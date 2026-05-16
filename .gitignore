@@ -1,0 +1,33 @@
+# 환경변수 (절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+
+# Supabase MCP 설정 (서비스 롤 키 포함)
+.mcp.json
+
+# 빌드 산출물
+dist/
+dist-ssr/
+
+# 의존성
+node_modules/
+
+# Vercel
+.vercel/
+
+# 로그
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 에디터
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

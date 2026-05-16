@@ -1,0 +1,26 @@
+# AI PM App — 기술 스택 명세
+# (실제 의존성은 package.json에서 관리됨)
+
+[Frontend]
+react@^18.3
+react-dom@^18.3
+react-router-dom@^6.x
+vite@^5.x
+tailwindcss@^3.x
+react-markdown@^9.x
+
+[Supabase]
+@supabase/supabase-js@^2.x
+
+[AI]
+@anthropic-ai/sdk@^0.x        # Claude API (claude-sonnet-4-6, claude-haiku-4-5)
+gray-matter@^4.x               # .md 파일 YAML 프론트매터 파싱
+
+[개발 도구]
+eslint                         # 코드 품질
+vitest@^2.x                    # 단위 테스트
+@testing-library/react         # 컴포넌트 테스트
+jsdom                          # 테스트 DOM 환경
+
+[배포]
+vercel                         # vercel.json 설정 포함, /api/*.js 서버리스 함수 자동 인식
