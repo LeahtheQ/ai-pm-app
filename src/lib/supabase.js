@@ -7,8 +7,6 @@ if (!supabaseUrl || !supabaseAnon) {
   throw new Error('VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 설정되지 않았습니다.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnon)
-
 // user_id는 localStorage의 익명 UUID (로그인 없는 MVP용)
 export function getUserId() {
   let uid = localStorage.getItem('ai_pm_user_id')
@@ -18,3 +16,10 @@ export function getUserId() {
   }
   return uid
 }
+
+// RLS 정책이 x-user-id 헤더로 행 필터링하므로 모든 요청에 포함
+export const supabase = createClient(supabaseUrl, supabaseAnon, {
+  global: {
+    headers: { 'x-user-id': getUserId() },
+  },
+})
