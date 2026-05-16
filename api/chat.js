@@ -23,8 +23,13 @@ const SPECIALIST_MODEL  = 'gemini-3-flash-preview'    // 전문가 응답용
 function loadAgentPrompt(agentName) {
   const filePath = join(ROOT, '.claude', 'agents', `${agentName}.md`)
   const raw = readFileSync(filePath, 'utf8')
-  const { content } = matter(raw)
-  return content.trim()
+  try {
+    const { content } = matter(raw)
+    return content.trim()
+  } catch {
+    // YAML 파싱 실패 시 정규식으로 프론트매터 직접 제거
+    return raw.replace(/^---[\s\S]*?---\s*\n/, '').trim()
+  }
 }
 
 // 사용자 질문을 분석해 적합한 에이전트를 선택
