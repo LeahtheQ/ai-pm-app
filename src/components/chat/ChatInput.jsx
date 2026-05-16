@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { getUserId } from '../../lib/supabase'
 
-export function ChatInput({ onSend, onFileUpload, disabled }) {
+export function ChatInput({ onSend, onFileUpload, disabled, attachedFile, onRemoveFile }) {
   const [text, setText] = useState('')
   const fileRef = useRef(null)
   const userId = getUserId()
@@ -38,18 +38,37 @@ export function ChatInput({ onSend, onFileUpload, disabled }) {
       console.error('파일 업로드 오류:', err)
     }
 
-    // 파일 입력 초기화
     e.target.value = ''
   }
 
   return (
     <div className="border-t border-gray-200 bg-white p-4">
+      {/* 첨부 파일 배지 */}
+      {attachedFile && (
+        <div className="max-w-3xl mx-auto mb-2">
+          <span className="inline-flex items-center gap-1.5 bg-primary-50 text-primary-700 text-xs px-2.5 py-1 rounded-full border border-primary-200">
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {attachedFile.name}
+            <button
+              onClick={onRemoveFile}
+              className="ml-0.5 text-primary-400 hover:text-primary-700 font-bold leading-none"
+              title="첨부 파일 제거"
+            >
+              ×
+            </button>
+          </span>
+        </div>
+      )}
+
       <div className="flex items-end gap-2 max-w-3xl mx-auto">
         {/* 파일 업로드 */}
         <button
           onClick={() => fileRef.current?.click()}
           className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-          title="파일 업로드 (Knowledge Base)"
+          title="파일 업로드 (.txt, .xlsx, .xls, .csv)"
           disabled={disabled}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +80,7 @@ export function ChatInput({ onSend, onFileUpload, disabled }) {
           ref={fileRef}
           type="file"
           className="hidden"
-          accept=".txt,.pdf,.md"
+          accept=".txt,.pdf,.md,.xlsx,.xls,.csv"
           onChange={handleFileChange}
         />
 

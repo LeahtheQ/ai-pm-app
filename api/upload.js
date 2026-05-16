@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { IncomingForm } from 'formidable'
 import { readFileSync } from 'fs'
+import * as XLSX from 'xlsx'
 
 export const config = { api: { bodyParser: false } }
 
@@ -9,10 +10,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 )
 
-// 파일 내용에서 텍스트 추출 (TXT 전용 — PDF/DOCX는 별도 라이브러리 필요)
-function extractText(filePath, mimeType) {
-  if (mimeType === 'text/plain') {
-    return readFileSync(filePath, 'utf8')
+function extractText(filePath, originalFilename) {
+  const ext = (originalFilename || '').split('.').pop().toLowerCase()
+  if (ext === 'txt') return readFileSync(filePath, 'utf8')
+  if (['xlsx', 'xls', 'csv'].includes(ext)) {
+    const workbook = XLSX.readFile(filePath)
+    const parts = []
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName]
+      const csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false })
+      if (csv.trim()) parts.push(`[시트: ${sheetName}]\n${csv}`)
+    }
+    return parts.join('\n\n') || null
   }
   return null
 }
@@ -53,7 +62,7 @@ export default async function handler(req, res) {
       }
 
       const { data: urlData } = supabase.storage.from('knowledge-base').getPublicUrl(storagePath)
-      const contentText = extractText(file.filepath, file.mimetype)
+      const contentText = extractText(file.filepath, file.originalFilename)
 
       // DB에 메타데이터 저장
       const { data: kbData, error: dbError } = await supabase
@@ -76,6 +85,7 @@ export default async function handler(req, res) {
         fileName: file.originalFilename,
         fileUrl: urlData?.publicUrl,
         contentPreview: contentText ? contentText.slice(0, 200) : null,
+        contentText,
       })
     } catch (e) {
       return res.status(500).json({ error: '서버 오류: ' + e.message })

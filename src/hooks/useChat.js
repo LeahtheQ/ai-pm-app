@@ -26,7 +26,7 @@ export function useChat(conversationId) {
     if (data) setMessages(data)
   }, [conversationId])
 
-  const sendMessage = useCallback(async (text) => {
+  const sendMessage = useCallback(async (text, fileContent = null) => {
     if (!text.trim() || !conversationId || isLoading) return
 
     const userMsg = { id: crypto.randomUUID(), role: 'user', content: text }
@@ -54,6 +54,7 @@ export function useChat(conversationId) {
           conversationId,
           userId,
           history: messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
+          fileContent,
         }),
       })
 

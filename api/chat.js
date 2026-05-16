@@ -152,7 +152,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: '허용되지 않는 메서드' })
   }
 
-  const { message, conversationId, userId, history = [] } = req.body
+  const { message, conversationId, userId, history = [], fileContent } = req.body
 
   if (!message || !conversationId || !userId) {
     return res.status(400).json({ error: '필수 파라미터 누락: message, conversationId, userId' })
@@ -179,6 +179,11 @@ export default async function handler(req, res) {
     // 3. 대화 히스토리 구성 (최근 10개)
     const chatHistory = history.slice(-10)
 
+    // 파일 첨부 시 메시지에 파일 내용 주입
+    const messageWithContext = fileContent
+      ? `[첨부 파일 내용]\n${fileContent}\n\n[사용자 질문]\n${message}`
+      : message
+
     // 4. 전문가 응답 생성 (최대 2회 시도)
     let finalResponse = ''
     let evalResult = null
@@ -191,7 +196,7 @@ export default async function handler(req, res) {
 
       if (attempts === 1) {
         sendEvent({ type: 'stream_start' })
-        for await (const chunk of streamSpecialistResponse(selectedAgent, chatHistory, message, systemExtra)) {
+        for await (const chunk of streamSpecialistResponse(selectedAgent, chatHistory, messageWithContext, systemExtra)) {
           if (chunk.type === 'token') {
             sendEvent({ type: 'token', text: chunk.text })
             finalResponse += chunk.text
@@ -200,7 +205,7 @@ export default async function handler(req, res) {
         sendEvent({ type: 'stream_end' })
       } else {
         sendEvent({ type: 'regenerating', feedback: evalResult?.feedback })
-        for await (const chunk of streamSpecialistResponse(selectedAgent, chatHistory, message, systemExtra)) {
+        for await (const chunk of streamSpecialistResponse(selectedAgent, chatHistory, messageWithContext, systemExtra)) {
           if (chunk.type === 'done') finalResponse = chunk.fullText
         }
         sendEvent({ type: 'regenerated_response', text: finalResponse })

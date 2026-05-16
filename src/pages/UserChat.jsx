@@ -9,6 +9,7 @@ export default function UserChat() {
   const { conversations, loading, createConversation, deleteConversation } = useConversations()
   const [currentId, setCurrentId] = useState(null)
   const [uploadedFiles, setUploadedFiles] = useState([])
+  const [attachedFile, setAttachedFile] = useState(null)
 
   const { messages, isLoading, status, sendMessage, loadHistory, setMessages } = useChat(currentId)
 
@@ -36,6 +37,12 @@ export default function UserChat() {
 
   const handleFileUpload = (data) => {
     setUploadedFiles((prev) => [...prev, data.fileName])
+    if (data.contentText) setAttachedFile({ name: data.fileName, content: data.contentText })
+  }
+
+  const handleSend = (text) => {
+    sendMessage(text, attachedFile?.content)
+    setAttachedFile(null)
   }
 
   return (
@@ -106,9 +113,11 @@ export default function UserChat() {
 
         {/* 입력창 */}
         <ChatInput
-          onSend={sendMessage}
+          onSend={handleSend}
           onFileUpload={handleFileUpload}
           disabled={isLoading || !currentId}
+          attachedFile={attachedFile}
+          onRemoveFile={() => setAttachedFile(null)}
         />
       </div>
     </div>
