@@ -16,8 +16,8 @@ const supabase = createClient(
 )
 
 // 모델 설정
-const CLASSIFIER_MODEL  = 'gemini-2.5-flash'    // 분류 및 eval용
-const SPECIALIST_MODEL  = 'gemini-2.5-flash'    // 전문가 응답용
+const CLASSIFIER_MODEL  = 'gemini-3-flash-preview'    // 분류 및 eval용
+const SPECIALIST_MODEL  = 'gemini-3-flash-preview'    // 전문가 응답용
 
 // .md 파일에서 YAML 프론트매터를 제거하고 마크다운 바디만 반환
 function loadAgentPrompt(agentName) {
